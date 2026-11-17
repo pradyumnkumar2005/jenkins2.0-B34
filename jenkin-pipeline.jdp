@@ -10,7 +10,10 @@ pipeline {
         stage('BUILD') {
             steps {
                 dir('backend') {
-                   sh 'mvn clean package -DskipTests'
+                   sh '''
+                rm -rf target/sonar
+                mvn clean package -DskipTests
+            '''
                 }
                 echo 'BUILD SUCCESS'
             }
