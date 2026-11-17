@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     stages {
         stage('PULL') {
             steps {
@@ -7,29 +8,34 @@ pipeline {
                 echo 'PULL SUCCESS'
             }
         }
+
         stage('BUILD') {
             steps {
                 dir('backend') {
-                   sh '''
-                rm -rf target/sonar
-                mvn clean package -DskipTests
-            '''
+                    sh '''
+                        rm -rf target/sonar
+                        mvn clean package -DskipTests
+                    '''
                 }
                 echo 'BUILD SUCCESS'
             }
         }
+
         stage('TEST') {
             steps {
-                 withSonarQubeEnv(credentialsId: 'sonarqube_credential') { 
-                   dir('backend') {
-                      sh ''' mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar   
--Dsonar.projectKey=test-project   
--Dsonar.projectName=\'test-project\' '''   
-                   } 
-                 }
+                withSonarQubeEnv(credentialsId: 'sonarqube_credential') {
+                    dir('backend') {
+                        sh '''
+                            mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+                            -Dsonar.projectKey=test-project \
+                            -Dsonar.projectName=test-project
+                        '''
+                    }
+                }
                 echo 'TEST SUCCESS'
             }
         }
+
         stage('DEPLOY') {
             steps {
                 echo 'DEPLOY SUCCESS'
