@@ -13,7 +13,6 @@ pipeline {
             steps {
                 dir('backend') {
                     sh '''
-                        rm -rf target/sonar
                         mvn clean package -DskipTests
                     '''
                 }
