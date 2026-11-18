@@ -41,7 +41,7 @@ pipeline {
                 echo 'QUALITY-PASSED'
                 }
 
-                echo 'QUALITY-PASSED'                 
+                echo  'QUALITY-PASSED'                 
 	    }    
         }
 
