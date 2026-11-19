@@ -17,7 +17,7 @@ variable "cluster_name" { // Variable for cluster name
   type    = string
   default = "my-cluster"
 
-}
+}   
 
 data "aws_subnets" "default" { // Fetch  all subnets in the default VPC
   filter {
