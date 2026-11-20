@@ -84,15 +84,9 @@ pipeline {
 
                     kubectl get services
 
-                    echo "Waiting for Backend..."
-
-                    kubectl rollout status deployment/backend \
-                        --timeout=180s
-
-                    echo "Waiting for Frontend..."
-
-                    kubectl rollout status deployment/frontend \
-                        --timeout=180s
+                    sh 'kubectl rollout status deployment/student-app --timeout=180s'
+                    sh 'kubectl rollout status deployment/frontend --timeout=180s'
+                    
                 '''
             }
         }
