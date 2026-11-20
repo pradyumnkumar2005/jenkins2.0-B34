@@ -67,48 +67,52 @@ pipeline {
             steps {
                 sh '''
                     aws eks update-kubeconfig \
-                        --region eu-central-1 \
+                        --region apsouth-1 \
                         --name my-cluster
 
-
-        failure {
-            echo 'Pipeline failed. Check Jenkins Console Output.'
-        }
-    }
-}
                     echo "Checking EKS Nodes..."
 
                     kubectl get nodes
-            echo 'Application successfully deployed on AWS EKS!'
-        }
 
                     echo "Deploying Backend..."
 
-    post {
-        success {
                     kubectl apply -f backend/k8s/
 
                     echo "Deploying Frontend..."
-
-    }
 
                     kubectl apply -f frontend/k8s/
 
                     echo "Checking Deployments..."
 
-            }
-        }
                     kubectl get deployments
 
                     kubectl get pods
 
-                        --timeout=180s
-                '''
                     kubectl get services
 
                     echo "Waiting for Backend..."
 
                     kubectl rollout status deployment/backend \
                         --timeout=180s
+
+                    echo "Waiting for Frontend..."
+
                     kubectl rollout status deployment/frontend \
+                        --timeout=180s
+                '''
+            }
+        }
+    }
+
+}
+    post {
+        success {
+            echo 'Application successfully deployed on AWS EKS!'
+        }
+        failure {
+            echo 'Pipeline failed. Check Jenkins Console Output.'
+        }
+    }
+}
+
 
