@@ -1,0 +1,116 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('PULL STAGE') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/pradyumnkumar2005/jenkins2.0-B34.git'
+            }
+        }
+
+        stage('FRONTEND-DOCKER-BUILD') {
+            steps {
+                sh '''
+                    cd frontend
+                    docker build -t gurudavare/easy-frontend:latest .
+                '''
+            }
+        }
+
+        stage('BACKEND-DOCKER-BUILD') {
+            steps {
+                sh '''
+                    cd backend
+                    docker build -t gurudavare/easy-backend:latest .
+                '''
+            }
+        }
+
+        stage('DOCKER-PUSH') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    sh '''
+                        set +x
+
+                        echo "$DOCKER_PASS" | docker login \
+                            -u "$DOCKER_USER" --password-stdin
+
+                        docker push gurudavare/easy-frontend:latest
+
+                        docker push gurudavare/easy-backend:latest
+
+                        docker logout
+                    '''
+                }
+            }
+        }
+
+        stage('DOCKER-CLEAN') {
+            steps {
+                sh '''
+                    docker rmi -f gurudavare/easy-frontend:latest || true
+
+                    docker rmi -f gurudavare/easy-backend:latest || true
+                '''
+            }
+        }
+
+        stage('DEPLOY') {
+            steps {
+                sh '''
+                    aws eks update-kubeconfig \
+                        --region eu-central-1 \
+                        --name my-cluster
+
+                    echo "Checking EKS Nodes..."
+
+                    kubectl get nodes
+
+                    echo "Deploying Backend..."
+
+                    kubectl apply -f backend/k8s/
+
+                    echo "Deploying Frontend..."
+
+                    kubectl apply -f frontend/k8s/
+
+                    echo "Checking Deployments..."
+
+                    kubectl get deployments
+
+                    kubectl get pods
+
+                    kubectl get services
+
+                    echo "Waiting for Backend..."
+
+                    kubectl rollout status deployment/backend \
+                        --timeout=180s
+
+                    echo "Waiting for Frontend..."
+
+                    kubectl rollout status deployment/frontend \
+                        --timeout=180s
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Application successfully deployed on AWS EKS!'
+        }
+
+        failure {
+            echo 'Pipeline failed. Check Jenkins Console Output.'
+        }
+    }
+}
