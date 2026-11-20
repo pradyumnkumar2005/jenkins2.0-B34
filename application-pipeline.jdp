@@ -104,7 +104,6 @@ pipeline {
         }
     }
 
-}
     post {
         success {
             echo 'Application successfully deployed on AWS EKS!'
