@@ -21,7 +21,7 @@ spec:
       containers:
         - name: frontend
 
-          image: shivansh7310/easy-frontend:latest
+          image: gurudavare/easy-frontend:latest
 
           imagePullPolicy: Always
 
