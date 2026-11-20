@@ -61,7 +61,7 @@ pipeline {
             steps {
                 sh '''
                     aws eks update-kubeconfig \
-                        --region apsouth-1 \
+                        --region ap-south-1 \
                         --name my-cluster
 
                     echo "Checking EKS Nodes..."
