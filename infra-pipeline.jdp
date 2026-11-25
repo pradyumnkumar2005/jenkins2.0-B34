@@ -1,37 +1,73 @@
+
 pipeline {
-     agent any 
-       stages {
-         stage ('PULL STAGE') { 
-	   steps {
+    agent any
+
+    stages {
+
+        stage('PULL STAGE') {
+            steps {
                 git 'https://github.com/pradyumnkumar2005/jenkins2.0-B34.git'
                 echo 'PULL SUCCESS'
-           }
-         }
-	 stage ('TERRAFORM-INIT & PLAN') {
-	   steps {
-	       sh '''
-	       terraform init -reconfigure
-	       terraform plan
-	       '''
-	    }
-	 }
+            }
+        }
 
-	 stage ('APPROVAL') {
-	   steps {
-	       timeout(time: 30, unit: 'MINUTES') {
-                    input message: 'Approval is required. Shall we proceed?, OK : "Approve"'
-	   
-	       }
-	   }
-	 }
+        stage('TERRAFORM-INIT') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'AWS_ACCESS_KEY_ID',
+                           variable: 'AWS_ACCESS_KEY_ID'),
 
-	 stage ('TERRAFORM-APPLY') {
-	   steps { 
-	       sh '''
-	       terraform apply --auto-approve
-	       '''
-           }
-	 }
+                    string(credentialsId: 'AWS_SECRET_ACCESS_KEY',
+                           variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    sh '''
+                        export AWS_DEFAULT_REGION=ap-south-1
+                        terraform init -reconfigure
+                    '''
+                }
+            }
+        }
 
-       }
+        stage('TERRAFORM-PLAN') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'AWS_ACCESS_KEY_ID',
+                           variable: 'AWS_ACCESS_KEY_ID'),
+
+                    string(credentialsId: 'AWS_SECRET_ACCESS_KEY',
+                           variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    sh '''
+                        export AWS_DEFAULT_REGION=ap-south-1
+                        terraform plan
+                    '''
+                }
+            }
+        }
+
+        stage('APPROVAL') {
+            steps {
+                timeout(time: 30, unit: 'MINUTES') {
+                    input message: 'Approval is required. Shall we proceed?'
+                }
+            }
+        }
+
+        stage('TERRAFORM-APPLY') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'AWS_ACCESS_KEY_ID',
+                           variable: 'AWS_ACCESS_KEY_ID'),
+
+                    string(credentialsId: 'AWS_SECRET_ACCESS_KEY',
+                           variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    sh '''
+                        export AWS_DEFAULT_REGION=ap-south-1
+                        terraform apply -auto-approve
+                    '''
+                }
+            }
+        }
+    }
 }
