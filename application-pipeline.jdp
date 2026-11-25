@@ -6,7 +6,7 @@ pipeline {
 
         stage('PULL') {
             steps {
-                git 'https://github.com/chetanraval07/jenkins2.0-B34.git'
+                git 'https://github.com/pradyumnkumar2005/jenkins2.0-B34.git'
                 echo 'PULL SUCCESS'
             }
         }
@@ -15,7 +15,7 @@ pipeline {
             steps {
                 sh '''
                     cd frontend
-                    docker build -t shivansh7310/easy-frontend:latest .
+                    docker build -t gurudavare/easy-frontend:latest .
                 '''
             }
         }
@@ -24,7 +24,7 @@ pipeline {
             steps {
                 sh '''
                     cd backend
-                    docker build -t shivansh7310/easy-backend:latest .
+                    docker build -t gurudavare/easy-backend:latest .
                 '''
             }
         }
@@ -44,9 +44,9 @@ pipeline {
                         echo "$DOCKER_PASS" | docker login \
                             -u "$DOCKER_USER" --password-stdin
 
-                        docker push shivansh7310/easy-frontend:latest
+                        docker push gurudavare/easy-frontend:latest
 
-                        docker push shivansh7310/easy-backend:latest
+                        docker push gurudavare/easy-backend:latest
 
                         docker logout
                     '''
@@ -57,9 +57,9 @@ pipeline {
         stage('DOCKER-CLEAN') {
             steps {
                 sh '''
-                    docker rmi -f shivansh7310/easy-frontend:latest || true
+                    docker rmi -f gurudavare/easy-frontend:latest || true
 
-                    docker rmi -f shivansh7310/easy-backend:latest || true
+                    docker rmi -f gurudavare/easy-backend:latest || true
                 '''
             }
         }
@@ -70,8 +70,8 @@ pipeline {
                     echo "Connecting to AWS EKS..."
 
                     aws eks update-kubeconfig \
-                        --region eu-west-3 \
-                        --name my-cluster34
+                        --region ap-south-1 \
+                        --name my-cluster
 
                     echo "Checking EKS Nodes..."
 
