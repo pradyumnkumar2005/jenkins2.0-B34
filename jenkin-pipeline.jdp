@@ -3,6 +3,7 @@ pipeline {
     agent any
 
     stages {
+
         stage('PULL') {
             steps {
                 git 'https://github.com/pradyumnkumar2005/jenkins2.0-B34.git'
@@ -13,9 +14,7 @@ pipeline {
         stage('BUILD') {
             steps {
                 dir('backend') {
-                    sh '''
-                        mvn clean package -DskipTests
-                    '''
+                    sh 'mvn clean package -DskipTests'
                 }
                 echo 'BUILD SUCCESS'
             }
@@ -23,7 +22,10 @@ pipeline {
 
         stage('TEST') {
             steps {
-                withSonarQubeEnv(installationName: 'sonarqube', credentialsId: 'sonar-tokan') {
+                withSonarQubeEnv(
+                    installationName: 'sonarqube',
+                    credentialsId: 'sonar-tokan'
+                ) {
                     dir('backend') {
                         sh '''
                             mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
@@ -39,16 +41,39 @@ pipeline {
         stage('QUALITY-GATE') {
             steps {
                 timeout(time: 8, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-tokan'
+                    waitForQualityGate(
+                        abortPipeline: false,
+                        credentialsId: 'sonar-tokan'
+                    )
                 }
                 echo 'QUALITY-PASSED'
             }
         }
 
-        stage('store-artifacts') {
+        stage('STORE-ARTIFACTS') {
             steps {
-                sh 'aws s3 cp backend/target/student-registration-backend-0.0.1-SNAPSHOT.jar s3://jenkins-test-project/student-app.jar'
-                echo 'DEPLOY  SUCCESS'
+                withCredentials([
+                    string(
+                        credentialsId: 'AWS_ACCESS_KEY_ID',
+                        variable: 'AWS_ACCESS_KEY_ID'
+                    ),
+                    string(
+                        credentialsId: 'AWS_SECRET_ACCESS_KEY',
+                        variable: 'AWS_SECRET_ACCESS_KEY'
+                    )
+                ]) {
+                    sh '''
+                        export AWS_DEFAULT_REGION=ap-south-1
+
+                        aws sts get-caller-identity
+
+                        aws s3 cp \
+                        backend/target/student-registration-backend-0.0.1-SNAPSHOT.jar \
+                        s3://jenkins-test-project/student-app.jar
+                    '''
+                }
+
+                echo 'ARTIFACT UPLOAD SUCCESS'
             }
         }
 
