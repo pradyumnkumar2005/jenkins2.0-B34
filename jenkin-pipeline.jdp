@@ -23,7 +23,7 @@ pipeline {
 
         stage('TEST') {
             steps {
-                withSonarQubeEnv(installationName: 'sonarqube', credentialsId: 'test-project') {
+                withSonarQubeEnv(installationName: 'sonarqube', credentialsId: 'sonar-tokan') {
                     dir('backend') {
                         sh '''
                             mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
