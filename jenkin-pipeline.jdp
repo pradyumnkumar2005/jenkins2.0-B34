@@ -38,11 +38,8 @@ pipeline {
 
         stage('QUALITY-GATE') {
             steps {
-                timeout(time: 8, unit: 'MINUTES') {
-                    waitForQualityGate(
-                        abortPipeline: false,
-                        credentialsId: 'sonar-tokan'
-                    )
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-tokan'
                 }
                 echo 'QUALITY-PASSED'
             }
