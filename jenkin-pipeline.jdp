@@ -48,7 +48,7 @@ pipeline {
         stage('store-artifacts') {
             steps {
                 sh 'aws s3 cp backend/target/student-registration-backend-0.0.1-SNAPSHOT.jar s3://jenkins-test-project/student-app.jar'
-                echo 'DEPLOY SUCCESS'
+                echo 'DEPLOY  SUCCESS'
             }
         }
 
